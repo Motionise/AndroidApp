@@ -1,22 +1,37 @@
 package com.dfrobot.angelo.blunobasicdemo;
 
 import android.content.Context;
+import android.graphics.Canvas;
+import android.graphics.Color;
+import android.graphics.Paint;
 import android.os.Bundle;
 import android.content.Intent;
+import android.support.annotation.Nullable;
+import android.util.AttributeSet;
+import android.util.Log;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ImageView;
+import android.widget.RelativeLayout;
 import android.widget.ScrollView;
 import android.widget.TextView;
 
 public class MainActivity  extends BlunoLibrary {
-	private Button buttonScan;
-	private Button buttonSerialSend;
-	private EditText serialSendText;
+	RelativeLayout parentView;
+	ImageView greenbarImgView;
+	private Button buttonScan, calibration;
 	private TextView serialReceivedText, flexTxt, kalmanTxt, magTxt;
-	String colon = ":";
-	String kalman, flex, sensorData;
+	String colon = ":", sensorDatastr;
+	String[] sensorData = new String[3];
+	String[] flexStr = new String[2];
+	String[] kalmanStr = new String[2];
+	String[] magStr = new String[4];
+	int flex, mx, my, mz, resFlex, tempFlex = 0;
+	double kalman;
+	boolean isSetDefaultSensorData = false;
+
 	
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -27,22 +42,12 @@ public class MainActivity  extends BlunoLibrary {
 
         serialBegin(115200);													//set the Uart Baudrate on BLE chip to 115200
 
+
         serialReceivedText=(TextView) findViewById(R.id.serialReveicedText);	//initial the EditText of the received data			//initial the EditText of the sending data
 
 		flexTxt = (TextView)findViewById(R.id.flexTxt);
 		kalmanTxt = (TextView)findViewById(R.id.kalmanTxt);
 		magTxt = (TextView)findViewById(R.id.magTxt);
-
-        buttonSerialSend = (Button) findViewById(R.id.buttonSerialSend);		//initial the button for sending the data
-        buttonSerialSend.setOnClickListener(new OnClickListener() {
-
-			@Override
-			public void onClick(View v) {
-				// TODO Auto-generated method stub
-
-				serialSend(serialSendText.getText().toString());				//send the data to the BLUNO
-			}
-		});
 
         buttonScan = (Button) findViewById(R.id.buttonScan);					//initial the button for scanning the BLE device
         buttonScan.setOnClickListener(new OnClickListener() {
@@ -52,6 +57,19 @@ public class MainActivity  extends BlunoLibrary {
 				// TODO Auto-generated method stub
 
 				buttonScanOnClickProcess();										//Alert Dialog for selecting the BLE device
+			}
+		});
+
+        parentView = (RelativeLayout)findViewById(R.id.parentView);
+        greenbarImgView = (ImageView)findViewById(R.id.greenBarImgView);
+        calibration = (Button) findViewById(R.id.calibration);
+
+        calibration.setOnClickListener(new OnClickListener() {
+			@Override
+			public void onClick(View view) {
+				isSetDefaultSensorData = false;
+				flex = 0;
+				greenbarImgView.setY(parentView.getRootView().getHeight()/3);
 			}
 		});
 	}
@@ -73,6 +91,9 @@ public class MainActivity  extends BlunoLibrary {
     @Override
     protected void onPause() {
         super.onPause();
+        flexTxt.setText("");
+        magTxt.setText("");
+        kalmanTxt.setText("");
         onPauseProcess();														//onPause Process by BlunoLibrary
     }
 	
@@ -113,22 +134,50 @@ public class MainActivity  extends BlunoLibrary {
 	@Override
 	public void onSerialReceived(String theString) {							//Once connection data received, this function will be called
 		// TODO Auto-generated method stub
+		// 블루투스 통신 속도가 낮아, 데이터를 충분히 받고 처리 함수에 전달.
 		serialReceivedText.append(theString);
-		sensorData = serialReceivedText.getText().toString();
-		if(sensorData.contains("\n")) {
+		sensorDatastr = serialReceivedText.getText().toString();
+		if(sensorDatastr.contains("\n")) {
+			sensorDatastr = sensorDatastr.replace("\n", "");
 			serialReceivedText.setText("");
-			flexTxt.setText(sensorData);
+			stringProcessing(sensorDatastr);
 		}
 
-		//stringProcessing(theString);
-		//The Serial data from the BLUNO may be sub-packaged, so using a buffer to hold the String is a good choice.
-		((ScrollView)serialReceivedText.getParent()).fullScroll(View.FOCUS_DOWN);
 	}
 
-	public void stringProcessing(String theString)
-	{
-		String[] sensorData = theString.split(colon);
-		flexTxt.setText(sensorData[0]);
-	}
+	public void stringProcessing(String theString) {
 
+		try { // 블루투스 통신 중, 쓰레기 값이 들어오는 경우가 있으므로 예외 처리
+			sensorData = theString.split(colon);
+
+			//본격적인 처리부분
+			flexStr = sensorData[0].split("\\s");
+			kalmanStr = sensorData[1].split("\\s");
+			magStr = sensorData[2].split("\\s");
+			// string to Int
+			// 이 값을 토대로 애니메이션 구현
+			flex = Integer.parseInt(flexStr[1]);
+			kalman = Double.parseDouble(kalmanStr[1]);
+			mx = Integer.parseInt(magStr[1]);
+			my = Integer.parseInt(magStr[2]);
+			mz = Integer.parseInt(magStr[3]);
+			//디버깅 용도
+			//System.out.println(flex + " " + kalman + " " + mx + " " + my + " " + mz);
+
+			if(isSetDefaultSensorData == false)
+			{
+				tempFlex = flex;
+				isSetDefaultSensorData = true;
+			}
+			resFlex = (flex - tempFlex) * 5;
+			System.out.println(resFlex + " " + flex + " " + tempFlex);
+			greenbarImgView.setY(parentView.getRootView().getHeight()/3 - resFlex);
+
+		} catch (Exception e) {
+			tempFlex = 0;
+			flex = 0;
+			resFlex = 0;
+			Log.e("sensor", theString);
+		}
+	}
 }

@@ -2,40 +2,31 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:paddingBottom="@dimen/activity_vertical_margin"
-    android:paddingLeft="@dimen/activity_horizontal_margin"
-    android:paddingRight="@dimen/activity_horizontal_margin"
-    android:paddingTop="@dimen/activity_vertical_margin"
+    android:padding="16dp"
     tools:context=".MainActivity"
     android:focusable="true"
+    android:id="@+id/parentView"
     android:focusableInTouchMode="true">
 
-    <ScrollView
-        android:layout_width="300dp"
-        android:layout_height="wrap_content"
-        android:id="@+id/scrollView"
-        android:layout_below="@+id/editText2"
-        android:layout_alignStart="@+id/editText2"
-        android:layout_alignParentBottom="true"
-        >
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_below="@id/editText2">
 
         <TextView
             android:id="@+id/serialReveicedText"
-            android:layout_width="300dp"
-            android:layout_height="wrap_content"
-            android:textSize="10dp"
-            android:layout_below="@+id/editText2"
-            android:layout_alignStart="@+id/editText2"
-            android:layout_alignParentBottom="true" />
-    </ScrollView>
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_marginTop="60dp"
+            android:text=""/>
+        <ImageView
+            android:id="@+id/numpadImgView"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:src="@drawable/numberpad"/>
 
-    <Button
-        android:id="@+id/buttonSerialSend"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_above="@+id/flexTxt"
-        android:layout_alignParentRight="true"
-        android:text="Send Data" />
+    </RelativeLayout>
 
     <TextView
         android:id="@+id/editText2"
@@ -43,9 +34,8 @@
         android:layout_height="wrap_content"
         android:layout_alignParentLeft="true"
         android:layout_below="@+id/flexTxt"
-        android:layout_marginTop="20dp"
         android:ems="10"
-        android:text="Received Data:"
+        android:text=""
         android:textSize="25sp" />
 
     <TextView
@@ -56,16 +46,16 @@
         android:layout_marginTop="22dp"
         android:text=" "
         android:textSize="10dp" />
+
     <TextView
-        android:layout_marginLeft="10dp"
         android:id="@+id/kalmanTxt"
         android:layout_width="100dp"
         android:layout_height="40dp"
-        android:layout_below="@+id/buttonScan"
-        android:layout_toRightOf="@id/flexTxt"
-        android:layout_marginTop="22dp"
+        android:layout_above="@+id/editText2"
+        android:layout_marginStart="8dp"
+        android:layout_toEndOf="@+id/flexTxt"
         android:text=" "
-        android:textSize="5dp" />
+        android:textSize="10dp" />
     <TextView
         android:layout_marginLeft="10dp"
         android:id="@+id/magTxt"
@@ -75,7 +65,7 @@
         android:layout_toRightOf="@id/kalmanTxt"
         android:layout_marginTop="22dp"
         android:text=" "
-        android:textSize="5dp" />
+        android:textSize="10dp" />
 
     <Button
         android:id="@+id/buttonScan"
@@ -84,5 +74,20 @@
         android:layout_alignParentLeft="true"
         android:layout_alignParentTop="true"
         android:text="Scan" />
+    <Button
+        android:id="@+id/calibration"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerHorizontal="true"
+        android:text="Calibration"/>
+
+    <ImageView
+        android:id="@+id/greenBarImgView"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/kalmanTxt"
+        android:layout_centerHorizontal="true"
+        android:scaleType="matrix"
+        android:src="@drawable/greenbar" />
 
 </RelativeLayout>
