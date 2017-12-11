@@ -11,6 +11,7 @@ import android.util.AttributeSet;
 import android.util.Log;
 import android.view.View;
 import android.view.View.OnClickListener;
+import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
@@ -21,6 +22,7 @@ import android.widget.TextView;
 public class MainActivity  extends BlunoLibrary {
 	RelativeLayout parentView;
 	ImageView greenbarImgView;
+	ViewGroup.LayoutParams params;
 	private Button buttonScan, calibration;
 	private TextView serialReceivedText, flexTxt, kalmanTxt, magTxt;
 	String colon = ":", sensorDatastr;
@@ -28,7 +30,7 @@ public class MainActivity  extends BlunoLibrary {
 	String[] flexStr = new String[2];
 	String[] kalmanStr = new String[2];
 	String[] magStr = new String[4];
-	int flex, mx, my, mz, resFlex, tempFlex = 0;
+	int flex, mx, my, mz, resFlex, greenbarHeight, tempFlex = 0;
 	double kalman;
 	boolean isSetDefaultSensorData = false;
 
@@ -72,6 +74,9 @@ public class MainActivity  extends BlunoLibrary {
 				greenbarImgView.setY(parentView.getRootView().getHeight()/3);
 			}
 		});
+
+		params = (ViewGroup.LayoutParams) greenbarImgView.getLayoutParams();
+		greenbarHeight = greenbarImgView.getBottom();
 	}
 
 	protected void onResume(){
@@ -171,6 +176,10 @@ public class MainActivity  extends BlunoLibrary {
 			}
 			resFlex = (flex - tempFlex) * 5;
 			System.out.println(resFlex + " " + flex + " " + tempFlex);
+			greenbarImgView.setRotation((float)(kalman/4)*2);
+			System.out.println("greenbar height: " + greenbarHeight);
+			greenbarImgView.setPivotY(greenbarImgView.getBottom());
+			//greenbarImgView.setLayoutParams(params);
 			greenbarImgView.setY(parentView.getRootView().getHeight()/3 - resFlex);
 
 		} catch (Exception e) {
